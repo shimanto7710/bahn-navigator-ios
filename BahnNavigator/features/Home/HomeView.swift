@@ -14,7 +14,7 @@ private enum HomeTab: Hashable {
     case journeys
     case profile
 }
-
+@MainActor
 struct HomeView: View {
     @State private var selectedTab: HomeTab = .booking
     private let tabBarColor = Color(red: 0.15, green: 0.16, blue: 0.18)
@@ -34,7 +34,7 @@ struct HomeView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            SearchJourney()
+            SearchJourneyView()
                 .tabItem {
                     Image(systemName: "arrow.triangle.swap")
                     Text("Booking")
@@ -86,6 +86,9 @@ struct ProfileView: View {
     }
 }
 
-#Preview {
-    HomeView()
+struct HomeView_Previews: PreviewProvider {
+    static var previews: some View {
+        HomeView()
+            .previewDevice("iPhone 16 Pro")
+    }
 }

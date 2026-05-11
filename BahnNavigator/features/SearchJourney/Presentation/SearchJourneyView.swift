@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct SearchJourney: View {
-    // Better practice: use @StateObject when this view creates and owns the view model.
+
+struct SearchJourneyView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = SearchJourneyViewModel()
+    @State private var isShowingLocationPicker = false
+
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -78,6 +82,34 @@ struct SearchJourney: View {
             Spacer()
         }
         .padding()
+        .contentShape(Rectangle())
+        .onAppear {
+            viewModel.configure(modelContext: modelContext)
+        }
+        .sheet(isPresented: $isShowingLocationPicker) {
+            LocationPickerSheet(
+                searchText: Binding(
+                    get: { viewModel.uiState.locationPicker.searchText },
+                    set: { viewModel.onLocationSearchChange($0) }
+                ),
+                locations: viewModel.uiState.locationPicker.results,
+                favoriteLocationIDs: viewModel.uiState.locationPicker.favoriteLocationIDs,
+                isLoading: viewModel.uiState.locationPicker.isLoading,
+                errorMessage: viewModel.uiState.locationPicker.errorMessage,
+                onSelectLocation: { location in
+                    viewModel.onLocationSelected(location)
+                    isShowingLocationPicker = false
+                },
+                onSaveLocation: { location in
+                    viewModel.onSaveLocationClick(location)
+                },
+                title: viewModel.uiState.locationPicker.title,
+                onCurrentPositionSelected: {
+                    viewModel.onClickCurrentPosition()
+                }
+            )
+            .presentationDetents([.large])
+        }
     }
 
     private var header: some View {
@@ -96,20 +128,20 @@ struct SearchJourney: View {
     private var routeFields: some View {
         ZStack(alignment: .trailing) {
             VStack {
-                routeTextField(
+                routeFieldButton(
                     "From",
-                    text: Binding(
-                        get: { viewModel.uiState.from },
-                        set: { viewModel.onFromChange($0) }
-                    )
-                )
-                routeTextField(
+                    value: viewModel.uiState.from
+                ) {
+                    viewModel.onLocationPickerOpened(for: .origin)
+                    isShowingLocationPicker = true
+                }
+                routeFieldButton(
                     "To",
-                    text: Binding(
-                        get: { viewModel.uiState.to },
-                        set: { viewModel.onToChange($0) }
-                    )
-                )
+                    value: viewModel.uiState.to
+                ) {
+                    viewModel.onLocationPickerOpened(for: .destination)
+                    isShowingLocationPicker = true
+                }
             }
 
             Button {
@@ -131,15 +163,23 @@ struct SearchJourney: View {
         .padding(.bottom, 15)
     }
 
-    private func routeTextField(_ placeholder: String, text: Binding<String>) -> some View {
-        TextField(placeholder, text: text)
-            .padding(5)
-            .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(.systemGray6))
-            )
+    private func routeFieldButton(
+        _ placeholder: String,
+        value: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(value.isEmpty ? placeholder : value)
+                .foregroundColor(value.isEmpty ? Color(.placeholderText) : .black)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(5)
+                .padding(.horizontal, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(.systemGray6))
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     private func settingsRow(
@@ -171,16 +211,18 @@ struct SearchJourney: View {
                     .padding(10)
             }
             .frame(maxWidth: .infinity)
-            // Better practice: make Spacer's empty area tappable inside a custom Button row.
             .contentShape(Rectangle())
             .padding(.leading, 4)
         }
-
-        // Better practice: .plain keeps the row from turning blue like a default text button.
         .buttonStyle(.plain)
     }
 }
 
-#Preview {
-    SearchJourney()
+
+
+struct SearchJourney_Previews: PreviewProvider {
+    static var previews: some View {
+        SearchJourneyView()
+            .previewDevice("iPhone 16 Pro")
+    }
 }
