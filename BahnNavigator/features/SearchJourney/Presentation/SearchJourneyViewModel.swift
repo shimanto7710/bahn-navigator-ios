@@ -26,6 +26,10 @@ enum LocationPickerField {
 
 @MainActor
 final class SearchJourneyViewModel: ObservableObject {
+    /// Delay before a typed query is sent to the network, to avoid hammering the
+    /// backend while the user is still typing.
+    private static let searchDebounceNanoseconds: UInt64 = 300_000_000
+
     @Published private(set) var uiState = SearchJourneyUiState()
     @Published var shouldNavigateToResults = false
     @Published private(set) var journeySearchParams: JourneySearchParams?
@@ -113,7 +117,7 @@ final class SearchJourneyViewModel: ObservableObject {
             uiState.locationPicker.errorMessage = nil
 
             do {
-                try await Task.sleep(nanoseconds: 300_000_000)
+                try await Task.sleep(nanoseconds: Self.searchDebounceNanoseconds)
                 try Task.checkCancellation()
 
                 let locations = try await searchLocations(query: query)

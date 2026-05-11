@@ -227,9 +227,6 @@ struct SearchJourneyView: View {
 
 
 
-struct SearchJourney_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchJourneyView()
-            .previewDevice("iPhone 16 Pro")
-    }
+#Preview("iPhone 16 Pro") {
+    SearchJourneyView()
 }

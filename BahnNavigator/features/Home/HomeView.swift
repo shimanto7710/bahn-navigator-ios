@@ -22,7 +22,7 @@ struct HomeView: View {
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(red: 0.15, green: 0.16, blue: 0.18, alpha: 1)
+        appearance.backgroundColor = .appDark
         appearance.stackedLayoutAppearance.selected.iconColor = .white
         appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.white]
         appearance.stackedLayoutAppearance.normal.iconColor = .systemGray
