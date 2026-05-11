@@ -1,0 +1,21 @@
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+DerivedData/
+build/
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+Package.resolved
+
+# CocoaPods (if added later)
+Pods/
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
