@@ -61,6 +61,7 @@ struct JourneysView: View {
                         Image(systemName: "arrow.right")
                             .font(.caption.weight(.bold))
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
                         Text(journey.toName)
                             .font(.headline)
                             .lineLimit(1)
@@ -70,6 +71,8 @@ struct JourneysView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 4)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Saved journey from \(journey.fromName) to \(journey.toName) on \(journey.departureDate.formatted(date: .abbreviated, time: .omitted))")
             }
             .onDelete(perform: viewModel.delete)
         }

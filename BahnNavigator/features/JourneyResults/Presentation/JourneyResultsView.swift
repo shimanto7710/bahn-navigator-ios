@@ -97,6 +97,19 @@ private struct JourneyCard: View {
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityDescription)
+    }
+
+    /// VoiceOver-friendly single-string summary so the row is read as one unit
+    /// rather than as a stream of disjointed labels.
+    private var accessibilityDescription: String {
+        let depart = journey.departure.formatted(date: .omitted, time: .shortened)
+        let arrive = journey.arrival.formatted(date: .omitted, time: .shortened)
+        let changeText = journey.changes == 0
+            ? "direct"
+            : "\(journey.changes) change\(journey.changes > 1 ? "s" : "")"
+        return "Departs \(depart), arrives \(arrive), duration \(journey.formattedDuration), \(changeText)"
     }
 
     // MARK: Departure / duration / arrival

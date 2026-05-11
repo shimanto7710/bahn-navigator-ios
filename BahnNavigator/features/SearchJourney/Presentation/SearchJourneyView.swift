@@ -80,6 +80,7 @@ struct SearchJourneyView: View {
                     .padding(.top, 20)
             }
             .disabled(!canSearch)
+            .accessibilityHint("Searches for journeys between the selected stations")
 
             Spacer()
         }
@@ -166,6 +167,8 @@ struct SearchJourneyView: View {
             }
             .buttonStyle(.plain)
             .padding(.trailing, 10)
+            .accessibilityLabel("Swap origin and destination")
+            .accessibilityHint("Switches the From and To stations")
         }
         .padding(.bottom, 15)
     }
