@@ -8,11 +8,16 @@
 import Foundation
 
 final class APIClient {
-    private let baseURL = URL(string: "http://localhost:3000")!
+    private let baseURL = AppConfiguration.baseURL
     private let session: URLSession
+    private let decoder: JSONDecoder
 
     init(session: URLSession = .shared) {
         self.session = session
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        self.decoder = decoder
     }
 
     func request<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
@@ -38,7 +43,7 @@ final class APIClient {
         }
 
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            return try decoder.decode(T.self, from: data)
         } catch {
             throw APIError.decodingFailed(error)
         }

@@ -38,4 +38,16 @@ struct APIEndpoint {
             ]
         )
     }
+
+    static func journeys(fromID: String, toID: String, departure: Date) -> APIEndpoint {
+        APIEndpoint(
+            path: "journeys",
+            queryItems: [
+                URLQueryItem(name: "from", value: fromID),
+                URLQueryItem(name: "to", value: toID),
+                URLQueryItem(name: "departure", value: ISO8601DateFormatter().string(from: departure)),
+                URLQueryItem(name: "results", value: "6")
+            ]
+        )
+    }
 }

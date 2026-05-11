@@ -63,6 +63,7 @@ struct SearchJourneyView: View {
                 }
             )
 
+            let canSearch = !viewModel.uiState.from.isEmpty && !viewModel.uiState.to.isEmpty
             Button {
                 viewModel.onSearchClick()
             } label: {
@@ -73,11 +74,12 @@ struct SearchJourneyView: View {
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(red: 0.15, green: 0.16, blue: 0.18))
+                            .fill(Color.appDark.opacity(canSearch ? 1 : 0.45))
                     )
                     .padding(.horizontal, 12)
                     .padding(.top, 20)
             }
+            .disabled(!canSearch)
 
             Spacer()
         }
@@ -85,6 +87,11 @@ struct SearchJourneyView: View {
         .contentShape(Rectangle())
         .onAppear {
             viewModel.configure(modelContext: modelContext)
+        }
+        .navigationDestination(isPresented: $viewModel.shouldNavigateToResults) {
+            if let params = viewModel.journeySearchParams {
+                JourneyResultsView(params: params)
+            }
         }
         .sheet(isPresented: $isShowingLocationPicker) {
             LocationPickerSheet(
@@ -118,7 +125,7 @@ struct SearchJourneyView: View {
                 .bold()
 
             Rectangle()
-                .fill(Color.red)
+                .fill(Color.appRed)
                 .frame(width: 122, height: 3)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

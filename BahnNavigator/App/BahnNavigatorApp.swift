@@ -14,6 +14,6 @@ struct BahnNavigatorApp: App {
         WindowGroup {
             HomeView()
         }
-        .modelContainer(for: CachedLocationEntity.self)
+        .modelContainer(for: [CachedLocationEntity.self, SavedJourneyEntity.self])
     }
 }

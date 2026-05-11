@@ -27,6 +27,8 @@ enum LocationPickerField {
 @MainActor
 final class SearchJourneyViewModel: ObservableObject {
     @Published private(set) var uiState = SearchJourneyUiState()
+    @Published var shouldNavigateToResults = false
+    @Published private(set) var journeySearchParams: JourneySearchParams?
 
     private let locationManager: LocationManaging
     private var locationRepository: LocationRepositoryProtocol?
@@ -70,7 +72,14 @@ final class SearchJourneyViewModel: ObservableObject {
     }
 
     func onSearchClick() {
-        print("On Tap Search Button")
+        guard let from = uiState.fromLocation, let to = uiState.toLocation else { return }
+        journeySearchParams = JourneySearchParams(
+            from: from,
+            to: to,
+            date: Date(),
+            passengers: 1
+        )
+        shouldNavigateToResults = true
     }
 
     func onLocationPickerOpened(for field: LocationPickerField) {
@@ -177,8 +186,10 @@ final class SearchJourneyViewModel: ObservableObject {
         switch uiState.locationPicker.selectedField {
         case .origin:
             uiState.from = location.name
+            uiState.fromLocation = location
         case .destination:
             uiState.to = location.name
+            uiState.toLocation = location
         }
     }
 
@@ -252,6 +263,8 @@ final class SearchJourneyViewModel: ObservableObject {
 struct SearchJourneyUiState {
     var from = ""
     var to = ""
+    var fromLocation: SearchStationModelElement?
+    var toLocation: SearchStationModelElement?
     var date = "Today, 12:17"
     var passengers = "1 pers. | 2nd Cl."
     var options = "Means of transport"

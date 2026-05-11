@@ -14,10 +14,10 @@ private enum HomeTab: Hashable {
     case journeys
     case profile
 }
+
 @MainActor
 struct HomeView: View {
     @State private var selectedTab: HomeTab = .booking
-    private let tabBarColor = Color(red: 0.15, green: 0.16, blue: 0.18)
 
     init() {
         let appearance = UITabBarAppearance()
@@ -34,12 +34,14 @@ struct HomeView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            SearchJourneyView()
-                .tabItem {
-                    Image(systemName: "arrow.triangle.swap")
-                    Text("Booking")
-                }
-                .tag(HomeTab.booking)
+            NavigationStack {
+                SearchJourneyView()
+            }
+            .tabItem {
+                Image(systemName: "arrow.triangle.swap")
+                Text("Booking")
+            }
+            .tag(HomeTab.booking)
 
             NearbyView()
                 .tabItem {
@@ -63,32 +65,7 @@ struct HomeView: View {
                 .tag(HomeTab.profile)
         }
         .tint(.white)
-        .toolbarBackground(tabBarColor, for: .tabBar)
+        .toolbarBackground(Color.appDark, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
-    }
-}
-
-struct NearbyView: View {
-    var body: some View {
-        Text("Nearby")
-    }
-}
-
-struct JourneysView: View {
-    var body: some View {
-        Text("Journeys")
-    }
-}
-
-struct ProfileView: View {
-    var body: some View {
-        Text("Profile")
-    }
-}
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-            .previewDevice("iPhone 16 Pro")
     }
 }
