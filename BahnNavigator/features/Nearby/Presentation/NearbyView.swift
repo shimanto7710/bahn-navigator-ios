@@ -77,3 +77,8 @@ struct NearbyView: View {
         }
     }
 }
+
+
+#Preview("iPhone 16 Pro") {
+    NearbyView()
+}

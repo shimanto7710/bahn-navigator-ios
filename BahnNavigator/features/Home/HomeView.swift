@@ -50,7 +50,7 @@ struct HomeView: View {
                 }
                 .tag(HomeTab.nearby)
 
-            JourneysView()
+            SavedJourneysView()
                 .tabItem {
                     Image(systemName: "list.bullet.rectangle")
                     Text("Journeys")
@@ -68,4 +68,8 @@ struct HomeView: View {
         .toolbarBackground(Color.appDark, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
     }
+}
+
+#Preview("iPhone 16 Pro") {
+    HomeView()
 }

@@ -13,6 +13,7 @@ struct SearchJourneyView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = SearchJourneyViewModel()
     @State private var isShowingLocationPicker = false
+    @State private var isShowingDatePicker = false
 
 
     var body: some View {
@@ -24,9 +25,9 @@ struct SearchJourneyView: View {
             settingsRow(
                 iconName: "calendar",
                 title: "Date",
-                value: viewModel.uiState.date,
+                value: viewModel.uiState.dateDisplayString,
                 action: {
-                    viewModel.onDateClick()
+                    isShowingDatePicker = true
                 }
             )
 
@@ -91,8 +92,21 @@ struct SearchJourneyView: View {
         }
         .navigationDestination(isPresented: $viewModel.shouldNavigateToResults) {
             if let params = viewModel.journeySearchParams {
-                JourneyResultsView(params: params)
+                JourneyDetailsView(params: params)
             }
+        }
+        .sheet(isPresented: $isShowingDatePicker) {
+            DatePickerSheet(
+                selectedDate: Binding(
+                    get: { viewModel.uiState.selectedDate },
+                    set: { viewModel.onDateSelected($0) }
+                ),
+                dateType: Binding(
+                    get: { viewModel.uiState.dateType },
+                    set: { viewModel.onDateTypeChanged($0) }
+                )
+            )
+            .presentationDetents([.large])
         }
         .sheet(isPresented: $isShowingLocationPicker) {
             LocationPickerSheet(

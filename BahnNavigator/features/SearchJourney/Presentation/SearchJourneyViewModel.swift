@@ -59,8 +59,12 @@ final class SearchJourneyViewModel: ObservableObject {
         uiState.to = from
     }
 
-    func onDateClick() {
-        print("Date row tapped")
+    func onDateSelected(_ date: Date) {
+        uiState.selectedDate = date
+    }
+
+    func onDateTypeChanged(_ type: DateTimeType) {
+        uiState.dateType = type
     }
 
     func onPassengersClick() {
@@ -80,7 +84,7 @@ final class SearchJourneyViewModel: ObservableObject {
         journeySearchParams = JourneySearchParams(
             from: from,
             to: to,
-            date: Date(),
+            date: uiState.selectedDate,
             passengers: 1
         )
         shouldNavigateToResults = true
@@ -91,7 +95,7 @@ final class SearchJourneyViewModel: ObservableObject {
         uiState.locationPicker = LocationPickerUiState(
             searchText: "",
             results: cachedLocations(),
-            favoriteLocationIDs: favoriteLocationIDs(),
+            favoriteLocationIDs: cachedLocationIDs(),
             selectedField: field
         )
     }
@@ -103,14 +107,14 @@ final class SearchJourneyViewModel: ObservableObject {
         let query = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
             uiState.locationPicker.results = cachedLocations()
-            uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+            uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
             uiState.locationPicker.errorMessage = nil
             uiState.locationPicker.isLoading = false
             return
         }
 
         uiState.locationPicker.results = cachedLocations()
-        uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+        uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
 
         locationSearchTask = Task {
             uiState.locationPicker.isLoading = true
@@ -124,14 +128,14 @@ final class SearchJourneyViewModel: ObservableObject {
                 try Task.checkCancellation()
 
                 uiState.locationPicker.results = locations
-                uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+                uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
                 uiState.locationPicker.isLoading = false
             } catch is CancellationError {
                 // A newer search replaced this one.
             } catch {
                 uiState.locationPicker.errorMessage = locationSearchMessage(for: error)
                 uiState.locationPicker.results = cachedLocations()
-                uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+                uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
                 uiState.locationPicker.isLoading = false
             }
         }
@@ -153,14 +157,14 @@ final class SearchJourneyViewModel: ObservableObject {
                 try Task.checkCancellation()
 
                 uiState.locationPicker.results = locations
-                uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+                uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
                 uiState.locationPicker.isLoading = false
             } catch is CancellationError {
                 // A newer search replaced this one.
             } catch {
                 uiState.locationPicker.errorMessage = locationSearchMessage(for: error)
                 uiState.locationPicker.results = cachedLocations()
-                uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+                uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
                 uiState.locationPicker.isLoading = false
             }
         }
@@ -178,7 +182,7 @@ final class SearchJourneyViewModel: ObservableObject {
             } catch {
                 uiState.locationPicker.errorMessage = "Could not get current location"
                 uiState.locationPicker.results = cachedLocations()
-                uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+                uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
                 uiState.locationPicker.isLoading = false
             }
         }
@@ -195,12 +199,16 @@ final class SearchJourneyViewModel: ObservableObject {
             uiState.to = location.name
             uiState.toLocation = location
         }
+
+        // Cache the selected station so it appears in future searches offline.
+        try? locationRepository?.saveLocation(location)
+        uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
     }
 
     func onSaveLocationClick(_ location: SearchStationModelElement) {
         do {
             try locationRepository?.saveLocation(location)
-            uiState.locationPicker.favoriteLocationIDs = favoriteLocationIDs()
+            uiState.locationPicker.favoriteLocationIDs = cachedLocationIDs()
             if uiState.locationPicker.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 uiState.locationPicker.results = cachedLocations()
             }
@@ -259,9 +267,13 @@ final class SearchJourneyViewModel: ObservableObject {
         (try? locationRepository?.cachedLocations()) ?? []
     }
 
-    private func favoriteLocationIDs() -> Set<String> {
+    private func cachedLocationIDs() -> Set<String> {
         Set(cachedLocations().map(\.displayID))
     }
+}
+
+enum DateTimeType: Equatable {
+    case departure, arrival
 }
 
 struct SearchJourneyUiState {
@@ -269,12 +281,25 @@ struct SearchJourneyUiState {
     var to = ""
     var fromLocation: SearchStationModelElement?
     var toLocation: SearchStationModelElement?
-    var date = "Today, 12:17"
+    var selectedDate: Date = Date()
+    var dateType: DateTimeType = .departure
     var passengers = "1 pers. | 2nd Cl."
     var options = "Means of transport"
     var connectionType = "Fastest Route"
 
     var locationPicker = LocationPickerUiState()
+
+    var dateDisplayString: String {
+        let time = selectedDate.formatted(date: .omitted, time: .shortened)
+        if Calendar.current.isDateInToday(selectedDate) {
+            return "Today, \(time)"
+        } else if Calendar.current.isDateInTomorrow(selectedDate) {
+            return "Tomorrow, \(time)"
+        } else {
+            let dayMonth = selectedDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+            return "\(dayMonth), \(time)"
+        }
+    }
 }
 
 struct LocationPickerUiState {

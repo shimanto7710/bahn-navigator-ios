@@ -15,7 +15,11 @@ struct SavedJourneysView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if viewModel.savedJourneys.isEmpty {
+                if let error = viewModel.errorMessage {
+                    ErrorView(message: error) {
+                        viewModel.configure(modelContext: modelContext)
+                    }
+                } else if viewModel.savedJourneys.isEmpty {
                     emptyState
                 } else {
                     journeyList

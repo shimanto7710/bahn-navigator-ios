@@ -210,10 +210,30 @@ struct LocationPickerSheet: View {
 }
 
 #Preview {
+    let stations: [SearchStationModelElement] = [
+        SearchStationModelElement(
+            id: "8011160", name: "Berlin Hbf", type: .station,
+            location: nil, products: nil, weight: nil, ril100IDS: nil,
+            ifoptID: nil, priceCategory: nil, transitAuthority: nil,
+            stadaID: nil, station: nil
+        ),
+        SearchStationModelElement(
+            id: "8000261", name: "München Hbf", type: .station,
+            location: nil, products: nil, weight: nil, ril100IDS: nil,
+            ifoptID: nil, priceCategory: nil, transitAuthority: nil,
+            stadaID: nil, station: nil
+        ),
+        SearchStationModelElement(
+            id: "8002549", name: "Hamburg Hbf", type: .station,
+            location: nil, products: nil, weight: nil, ril100IDS: nil,
+            ifoptID: nil, priceCategory: nil, transitAuthority: nil,
+            stadaID: nil, station: nil
+        ),
+    ]
     LocationPickerSheet(
-        searchText: .constant(""),
-        locations: [],
-        favoriteLocationIDs: [],
+        searchText: .constant("Berlin"),
+        locations: stations,
+        favoriteLocationIDs: Set(["8011160"]),
         isLoading: false,
         errorMessage: nil,
         onSelectLocation: { _ in },

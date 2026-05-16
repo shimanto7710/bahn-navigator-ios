@@ -57,3 +57,7 @@ struct ProfileView: View {
         .padding(.vertical, 2)
     }
 }
+
+#Preview("iPhone 16 Pro") {
+    ProfileView()
+}

@@ -11,6 +11,7 @@ import SwiftData
 @MainActor
 final class SavedJourneysViewModel: ObservableObject {
     @Published private(set) var savedJourneys: [SavedJourneyEntity] = []
+    @Published private(set) var errorMessage: String?
 
     private var modelContext: ModelContext?
 
@@ -26,10 +27,13 @@ final class SavedJourneysViewModel: ObservableObject {
         }
         do {
             try modelContext.save()
+            loadJourneys()
         } catch {
-            assertionFailure("Failed to delete saved journey: \(error)")
+            // Roll back the in-memory deletions so the list stays consistent with disk.
+            modelContext.rollback()
+            loadJourneys()
+            errorMessage = "Could not delete journey. Please try again."
         }
-        loadJourneys()
     }
 
     private func loadJourneys() {
@@ -37,6 +41,11 @@ final class SavedJourneysViewModel: ObservableObject {
         let descriptor = FetchDescriptor<SavedJourneyEntity>(
             sortBy: [SortDescriptor(\.savedAt, order: .reverse)]
         )
-        savedJourneys = (try? modelContext.fetch(descriptor)) ?? []
+        do {
+            savedJourneys = try modelContext.fetch(descriptor)
+            errorMessage = nil
+        } catch {
+            errorMessage = "Could not load saved journeys."
+        }
     }
 }

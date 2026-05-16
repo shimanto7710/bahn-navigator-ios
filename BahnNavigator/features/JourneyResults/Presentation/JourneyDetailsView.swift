@@ -10,12 +10,12 @@ import SwiftData
 
 struct JourneyDetailsView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var viewModel: JourneyResultsViewModel
+    @StateObject private var viewModel: JourneyDetailsViewModel
     private let params: JourneySearchParams
 
     init(params: JourneySearchParams) {
         self.params = params
-        _viewModel = StateObject(wrappedValue: JourneyResultsViewModel(params: params))
+        _viewModel = StateObject(wrappedValue: JourneyDetailsViewModel(params: params))
     }
 
     var body: some View {

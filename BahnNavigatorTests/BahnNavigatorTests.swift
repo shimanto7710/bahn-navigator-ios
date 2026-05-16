@@ -17,7 +17,7 @@ struct JourneyResultsViewModelTests {
     @Test
     func loadPopulatesJourneysOnSuccess() async {
         let stub = StubJourneyService(result: .success([Journey.fixture()]))
-        let viewModel = JourneyResultsViewModel(
+        let viewModel = JourneyDetailsViewModel(
             params: .fixture(),
             service: stub
         )
@@ -32,7 +32,7 @@ struct JourneyResultsViewModelTests {
     @Test
     func loadSetsErrorMessageOnFailure() async {
         let stub = StubJourneyService(result: .failure(APIError.statusCode(500)))
-        let viewModel = JourneyResultsViewModel(
+        let viewModel = JourneyDetailsViewModel(
             params: .fixture(),
             service: stub
         )
@@ -47,7 +47,7 @@ struct JourneyResultsViewModelTests {
     @Test
     func loadIgnoresCancellationError() async {
         let stub = StubJourneyService(result: .failure(CancellationError()))
-        let viewModel = JourneyResultsViewModel(
+        let viewModel = JourneyDetailsViewModel(
             params: .fixture(),
             service: stub
         )
