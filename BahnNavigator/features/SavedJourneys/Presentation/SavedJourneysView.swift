@@ -8,9 +8,9 @@
 import SwiftUI
 import SwiftData
 
-struct JourneysView: View {
+struct SavedJourneysView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var viewModel = JourneysViewModel()
+    @StateObject private var viewModel = SavedJourneysViewModel()
 
     var body: some View {
         NavigationStack {
@@ -81,4 +81,29 @@ struct JourneysView: View {
             EditButton()
         }
     }
+}
+
+#Preview("With journeys") {
+    SavedJourneysView()
+        .modelContainer(for: SavedJourneyEntity.self, inMemory: true) { result in
+            if let context = try? result.get().mainContext {
+                context.insert(SavedJourneyEntity(
+                    id: "1",
+                    fromName: "Berlin Hbf",
+                    toName: "München Hbf",
+                    departureDate: Date()
+                ))
+                context.insert(SavedJourneyEntity(
+                    id: "2",
+                    fromName: "Hamburg Hbf",
+                    toName: "Frankfurt (Main) Hbf",
+                    departureDate: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date()
+                ))
+            }
+        }
+}
+
+#Preview("Empty state") {
+    SavedJourneysView()
+        .modelContainer(for: SavedJourneyEntity.self, inMemory: true)
 }

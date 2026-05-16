@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct JourneyResultsView: View {
+struct JourneyDetailsView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: JourneyResultsViewModel
     private let params: JourneySearchParams
 
@@ -35,6 +37,7 @@ struct JourneyResultsView: View {
         .navigationTitle("Connections")
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .onAppear { viewModel.configure(modelContext: modelContext) }
     }
 
     // MARK: - Journey list
@@ -44,7 +47,11 @@ struct JourneyResultsView: View {
             LazyVStack(spacing: 12) {
                 routeHeader
                 ForEach(viewModel.uiState.journeys) { journey in
-                    JourneyCard(journey: journey)
+                    JourneyCard(
+                        journey: journey,
+                        isSaved: viewModel.uiState.savedJourneyIDs.contains(journey.id),
+                        onSave: { viewModel.saveJourney(journey) }
+                    )
                 }
             }
             .padding()
@@ -87,6 +94,8 @@ struct JourneyResultsView: View {
 
 private struct JourneyCard: View {
     let journey: Journey
+    let isSaved: Bool
+    let onSave: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -132,6 +141,14 @@ private struct JourneyCard: View {
 
             Text(journey.arrival.formatted(date: .omitted, time: .shortened))
                 .font(.title3.weight(.semibold))
+
+            Button(action: onSave) {
+                Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                    .foregroundColor(isSaved ? Color.appRed : .secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isSaved ? "Journey saved" : "Save journey")
+            .disabled(isSaved)
         }
     }
 
@@ -184,5 +201,44 @@ private struct JourneyCard: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+}
+
+#Preview {
+    let berlin = SearchStationModelElement(
+        id: "8011160",
+        name: "Berlin Hbf",
+        type: .station,
+        location: nil,
+        products: nil,
+        weight: nil,
+        ril100IDS: nil,
+        ifoptID: nil,
+        priceCategory: nil,
+        transitAuthority: nil,
+        stadaID: nil,
+        station: nil
+    )
+    let munich = SearchStationModelElement(
+        id: "8000261",
+        name: "München Hbf",
+        type: .station,
+        location: nil,
+        products: nil,
+        weight: nil,
+        ril100IDS: nil,
+        ifoptID: nil,
+        priceCategory: nil,
+        transitAuthority: nil,
+        stadaID: nil,
+        station: nil
+    )
+    NavigationStack {
+        JourneyDetailsView(params: JourneySearchParams(
+            from: berlin,
+            to: munich,
+            date: Date(),
+            passengers: 1
+        ))
     }
 }

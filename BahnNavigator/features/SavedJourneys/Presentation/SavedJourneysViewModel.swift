@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @MainActor
-final class JourneysViewModel: ObservableObject {
+final class SavedJourneysViewModel: ObservableObject {
     @Published private(set) var savedJourneys: [SavedJourneyEntity] = []
 
     private var modelContext: ModelContext?
