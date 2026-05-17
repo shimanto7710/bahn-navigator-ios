@@ -14,6 +14,8 @@ struct SearchJourneyView: View {
     @StateObject private var viewModel = SearchJourneyViewModel()
     @State private var isShowingLocationPicker = false
     @State private var isShowingDatePicker = false
+    @State private var isShowingOptions = false
+    @State private var isShowingConnectionType = false
 
 
     var body: some View {
@@ -49,7 +51,7 @@ struct SearchJourneyView: View {
                 title: "Options",
                 value: viewModel.uiState.options,
                 action: {
-                    viewModel.onOptionsClick()
+                    isShowingOptions = true
                 }
             )
 
@@ -58,9 +60,9 @@ struct SearchJourneyView: View {
             settingsRow(
                 iconName: "figure.walk",
                 title: "Type Of Connection",
-                value: viewModel.uiState.connectionType,
+                value: viewModel.uiState.connectionType.rawValue,
                 action: {
-                    viewModel.onConnectionTypeClick()
+                    isShowingConnectionType = true
                 }
             )
 
@@ -94,6 +96,15 @@ struct SearchJourneyView: View {
             if let params = viewModel.journeySearchParams {
                 JourneyDetailsView(params: params)
             }
+        }
+        .sheet(isPresented: $isShowingOptions) {
+            OptionSheet(viewModel: viewModel)
+                .presentationDetents([.large])
+        }
+        .sheet(isPresented: $isShowingConnectionType) {
+            ConnectionTypeSheet()
+                .environmentObject(viewModel)
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $isShowingDatePicker) {
             DatePickerSheet(

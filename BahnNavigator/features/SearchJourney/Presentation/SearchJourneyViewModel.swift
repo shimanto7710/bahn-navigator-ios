@@ -30,7 +30,7 @@ final class SearchJourneyViewModel: ObservableObject {
     /// backend while the user is still typing.
     private static let searchDebounceNanoseconds: UInt64 = 300_000_000
 
-    @Published private(set) var uiState = SearchJourneyUiState()
+    @Published var uiState = SearchJourneyUiState()
     @Published var shouldNavigateToResults = false
     @Published private(set) var journeySearchParams: JourneySearchParams?
 
@@ -71,15 +71,50 @@ final class SearchJourneyViewModel: ObservableObject {
         print("Passengers row tapped")
     }
 
-    func onOptionsClick() {
-        print("Options row tapped")
+    func applyModeFilter(_ filter: TransportModeFilter) {
+        uiState.transportOptions.modeFilter = filter
+        switch filter {
+        case .all:
+            uiState.transportOptions.highSpeedTrains  = true
+            uiState.transportOptions.intercityTrains  = true
+            uiState.transportOptions.interregioTrains = true
+            uiState.transportOptions.regionalTrains   = true
+            uiState.transportOptions.sBahn            = true
+            uiState.transportOptions.bus              = true
+            uiState.transportOptions.boat             = true
+            uiState.transportOptions.underground      = true
+            uiState.transportOptions.tram             = true
+            uiState.transportOptions.taxiService      = true
+        case .longDistance:
+            uiState.transportOptions.highSpeedTrains  = true
+            uiState.transportOptions.intercityTrains  = true
+            uiState.transportOptions.interregioTrains = true
+            uiState.transportOptions.regionalTrains   = false
+            uiState.transportOptions.sBahn            = false
+            uiState.transportOptions.bus              = false
+            uiState.transportOptions.boat             = false
+            uiState.transportOptions.underground      = false
+            uiState.transportOptions.tram             = false
+            uiState.transportOptions.taxiService      = false
+        case .localRegional:
+            uiState.transportOptions.highSpeedTrains  = false
+            uiState.transportOptions.intercityTrains  = false
+            uiState.transportOptions.interregioTrains = false
+            uiState.transportOptions.regionalTrains   = true
+            uiState.transportOptions.sBahn            = true
+            uiState.transportOptions.bus              = true
+            uiState.transportOptions.boat             = true
+            uiState.transportOptions.underground      = true
+            uiState.transportOptions.tram             = true
+            uiState.transportOptions.taxiService      = true
+        }
     }
 
-    func onConnectionTypeClick() {
-        print("Fastest connections row tapped")
+    func resetTransportOptions() {
+        uiState.transportOptions = TransportOptions()
     }
 
-    func onSearchClick() {
+func onSearchClick() {
         guard let from = uiState.fromLocation, let to = uiState.toLocation else { return }
         journeySearchParams = JourneySearchParams(
             from: from,
@@ -285,7 +320,8 @@ struct SearchJourneyUiState {
     var dateType: DateTimeType = .departure
     var passengers = "1 pers. | 2nd Cl."
     var options = "Means of transport"
-    var connectionType = "Fastest Route"
+    var connectionType: ConnectionType = .fastest
+    var transportOptions = TransportOptions()
 
     var locationPicker = LocationPickerUiState()
 
@@ -300,6 +336,41 @@ struct SearchJourneyUiState {
             return "\(dayMonth), \(time)"
         }
     }
+}
+
+// MARK: - Transport options
+
+enum ConnectionType: String, CaseIterable {
+    case fastest  = "Fastest Route"
+    case reliable = "Reliable Route"
+}
+
+enum TransportModeFilter: String, CaseIterable {
+    case all               = "All"
+    case localRegional     = "Local/regional transport only"
+    case longDistance      = "Long-distance travel only"
+}
+
+struct TransportOptions {
+    // Mode filter
+    var modeFilter: TransportModeFilter = .localRegional
+
+    // Individual transport types
+    var highSpeedTrains:  Bool = false
+    var intercityTrains:  Bool = false
+    var interregioTrains: Bool = false
+    var regionalTrains:   Bool = true
+    var sBahn:            Bool = true
+    var bus:              Bool = true
+    var boat:             Bool = true
+    var underground:      Bool = true
+    var tram:             Bool = true
+    var taxiService:      Bool = true
+
+    // Other options
+    var dTicketOnly:   Bool = false
+    var bicycle:       Bool = false
+    var directService: Bool = false
 }
 
 struct LocationPickerUiState {
