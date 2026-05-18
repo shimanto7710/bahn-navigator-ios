@@ -11,6 +11,7 @@ import SwiftData
 
 struct SearchJourneyView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var router: AppRouter
     @StateObject private var viewModel = SearchJourneyViewModel()
     @State private var isShowingLocationPicker = false
     @State private var isShowingDatePicker = false
@@ -68,7 +69,9 @@ struct SearchJourneyView: View {
 
             let canSearch = !viewModel.uiState.from.isEmpty && !viewModel.uiState.to.isEmpty
             Button {
-                viewModel.onSearchClick()
+                if let params = viewModel.buildSearchParams() {
+                    router.navigate(to: .journeyResults(params))
+                }
             } label: {
                 Text("Search")
                     .font(.system(size: 18, weight: .bold))
@@ -91,11 +94,6 @@ struct SearchJourneyView: View {
         .contentShape(Rectangle())
         .onAppear {
             viewModel.configure(modelContext: modelContext)
-        }
-        .navigationDestination(isPresented: $viewModel.shouldNavigateToResults) {
-            if let params = viewModel.journeySearchParams {
-                JourneyDetailsView(params: params)
-            }
         }
         .sheet(isPresented: $isShowingOptions) {
             OptionSheet(viewModel: viewModel)
@@ -256,5 +254,8 @@ struct SearchJourneyView: View {
 
 
 #Preview("iPhone 16 Pro") {
-    SearchJourneyView()
+    NavigationStack {
+        SearchJourneyView()
+    }
+    .environmentObject(AppRouter())
 }

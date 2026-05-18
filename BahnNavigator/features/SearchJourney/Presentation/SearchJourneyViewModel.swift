@@ -31,8 +31,6 @@ final class SearchJourneyViewModel: ObservableObject {
     private static let searchDebounceNanoseconds: UInt64 = 300_000_000
 
     @Published var uiState = SearchJourneyUiState()
-    @Published var shouldNavigateToResults = false
-    @Published private(set) var journeySearchParams: JourneySearchParams?
 
     private let locationManager: LocationManaging
     private var locationRepository: LocationRepositoryProtocol?
@@ -114,15 +112,15 @@ final class SearchJourneyViewModel: ObservableObject {
         uiState.transportOptions = TransportOptions()
     }
 
-func onSearchClick() {
-        guard let from = uiState.fromLocation, let to = uiState.toLocation else { return }
-        journeySearchParams = JourneySearchParams(
+func buildSearchParams() -> JourneySearchParams? {
+        guard let from = uiState.fromLocation, let to = uiState.toLocation else { return nil }
+        return JourneySearchParams(
             from: from,
             to: to,
             date: uiState.selectedDate,
-            passengers: 1
+            passengers: 1,
+            products: JourneyProducts(from: uiState.transportOptions)
         )
-        shouldNavigateToResults = true
     }
 
     func onLocationPickerOpened(for field: LocationPickerField) {
@@ -371,6 +369,23 @@ struct TransportOptions {
     var dTicketOnly:   Bool = false
     var bicycle:       Bool = false
     var directService: Bool = false
+}
+
+extension JourneyProducts {
+    init(from options: TransportOptions) {
+        self.init(
+            nationalExpress: options.highSpeedTrains,
+            national: options.intercityTrains,
+            regionalExpress: options.interregioTrains,
+            regional: options.regionalTrains,
+            suburban: options.sBahn,
+            subway: options.underground,
+            tram: options.tram,
+            bus: options.bus,
+            ferry: options.boat,
+            taxi: options.taxiService
+        )
+    }
 }
 
 struct LocationPickerUiState {

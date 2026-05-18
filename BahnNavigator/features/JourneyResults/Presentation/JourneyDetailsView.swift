@@ -238,7 +238,10 @@ private struct JourneyCard: View {
             from: berlin,
             to: munich,
             date: Date(),
-            passengers: 1
+            passengers: 1,
+//            results: 10,
+            products: .all,
+//            loyaltyCard: nil
         ))
     }
 }

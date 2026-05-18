@@ -106,3 +106,15 @@ enum SearchStationModelType: String, Codable {
 }
 
 typealias SearchStationModel = [SearchStationModelElement]
+
+// MARK: - Hashable
+
+extension SearchStationModelElement: Hashable {
+    static func == (lhs: SearchStationModelElement, rhs: SearchStationModelElement) -> Bool {
+        lhs.displayID == rhs.displayID
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(displayID)
+    }
+}

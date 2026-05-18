@@ -18,6 +18,7 @@ private enum HomeTab: Hashable {
 @MainActor
 struct HomeView: View {
     @State private var selectedTab: HomeTab = .booking
+    @StateObject private var router = AppRouter()
 
     init() {
         let appearance = UITabBarAppearance()
@@ -34,9 +35,16 @@ struct HomeView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            NavigationStack {
+            NavigationStack(path: $router.bookingPath) {
                 SearchJourneyView()
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                        case .journeyResults(let params):
+                            JourneyDetailsView(params: params)
+                        }
+                    }
             }
+            .environmentObject(router)
             .tabItem {
                 Image(systemName: "arrow.triangle.swap")
                 Text("Booking")

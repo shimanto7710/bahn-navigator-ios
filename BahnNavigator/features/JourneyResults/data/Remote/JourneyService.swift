@@ -21,13 +21,7 @@ final class JourneyService: JourneyServiceProtocol {
     }
 
     func searchJourneys(params: JourneySearchParams) async throws -> [Journey] {
-        let response: JourneysResponse = try await apiClient.request(
-            .journeys(
-                fromID: params.from.id ?? "",
-                toID: params.to.id ?? "",
-                departure: params.date
-            )
-        )
+        let response: JourneysResponse = try await apiClient.request(.journeys(params: params))
         return response.journeys
     }
 }

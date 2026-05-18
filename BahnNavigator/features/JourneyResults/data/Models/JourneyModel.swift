@@ -95,9 +95,48 @@ enum TransportProduct: String, Decodable {
 
 // MARK: - JourneySearchParams
 
-struct JourneySearchParams {
+struct JourneySearchParams: Hashable {
     let from: SearchStationModelElement
     let to: SearchStationModelElement
     let date: Date
     let passengers: Int
+//    let results: Int
+    let products: JourneyProducts
+//    let loyaltyCard: LoyaltyCard?
+}
+
+// MARK: - JourneyProducts
+
+struct JourneyProducts: Hashable {
+    var nationalExpress: Bool
+    var national: Bool
+    var regionalExpress: Bool
+    var regional: Bool
+    var suburban: Bool
+    var subway: Bool
+    var tram: Bool
+    var bus: Bool
+    var ferry: Bool
+    var taxi: Bool
+
+    static let all = JourneyProducts(
+        nationalExpress: true, national: true,
+        regionalExpress: true, regional: true,
+        suburban: true, subway: true,
+        tram: true, bus: true,
+        ferry: true, taxi: true
+    )
+}
+
+// MARK: - LoyaltyCard
+
+struct LoyaltyCard {
+    enum CardType: String {
+        case bahncard2nd25 = "bahncard-2nd-25"
+        case bahncard2nd50 = "bahncard-2nd-50"
+        case bahncard1st25 = "bahncard-1st-25"
+        case bahncard1st50 = "bahncard-1st-50"
+    }
+
+    let type: CardType
 }
